@@ -1,1 +1,75 @@
-var nav=document.querySelector(".main-nav"),navToggle=document.querySelector(".main-nav__toggle");nav.classList.remove("main-nav--nojs"),navToggle.addEventListener("click",function(){navToggle.classList.contains("main-nav__toggle--close")?(navToggle.classList.remove("main-nav__toggle--close"),navToggle.classList.add("main-nav__toggle--open")):(navToggle.classList.add("main-nav__toggle--close"),navToggle.classList.remove("main-nav__toggle--open"))}),ymaps.ready(function(){if(window.screen.availWidth<768)var e=new ymaps.Map("map",{center:[59.938783,30.323065],zoom:16},{searchControlProvider:"yandex#search"}),a=(ymaps.templateLayoutFactory.createClass('<div style="color: #FFFFFF; font-weight: bold;">$[properties.iconContent]</div>'),new ymaps.Placemark(e.getCenter(),{hintContent:"Cat Energy"},{iconLayout:"default#image",iconImageHref:"img/map-pin.png",iconImageSize:[55,53],iconImageOffset:[-25,-35]}));else e=new ymaps.Map("map",{center:[59.938783,30.323065],zoom:16},{searchControlProvider:"yandex#search"}),ymaps.templateLayoutFactory.createClass('<div style="color: #FFFFFF; font-weight: bold;">$[properties.iconContent]</div>'),a=new ymaps.Placemark(e.getCenter(),{hintContent:"Cat Energy"},{iconLayout:"default#image",iconImageHref:"img/map-pin.png",iconImageSize:[124,106],iconImageOffset:[-85,-85]});e.geoObjects.add(a)});
+//Callback popap
+
+const openPopap = document.querySelector('.button--catalog');
+const closePopap = document.querySelector('.callback__clouse');
+const popap = document.querySelector('.callback--contacts');
+
+popap.classList.remove('open');
+
+openPopap.addEventListener('click', function(evet) {
+  evet.preventDefault();
+  popap.classList.add('open');
+});
+
+closePopap.addEventListener('click', function(evet) {
+  evet.preventDefault();
+  popap.classList.remove('open');
+});
+
+/*
+jQuery(function ($) {
+  $(function(){
+    $('.button--catalog').on('click', function(evet){
+      evet.preventDefault();
+      $('.callback--contacts').addClass('open');
+    });
+
+    $('.callback__clouse').on('click', function(evet){
+      evet.preventDefault();
+      $('.callback--contacts').removeClass('open');
+    });
+  });
+});*/
+
+// Анимация сообщения о результате
+var showmsg = new TimelineMax();
+showmsg.add(TweenMax.to(".msg", 0.7, {opacity: 1,y: -40,ease: Expo.easeOut}));
+showmsg.add(TweenMax.to(".msg", 0.7, {opacity: 0,y: 0,ease: Expo.easeOut,delay: 2}));
+showmsg.pause();
+
+// Анимация плашки слова "подождите"
+var loadanim = TweenLite.to(".loading", 1, {autoAlpha: 0.8});
+loadanim.pause();
+
+// Отправка данных на сервер
+$('#form').trigger('reset');
+$(function() {
+  'use strict';
+  $('#form').on('submit', function(e) {
+    $('.msg').removeClass('error success');
+    $('input').removeClass('inputerror');
+    loadanim.play();
+    e.preventDefault();
+    $.ajax({
+      url: 'send.php',
+      type: 'POST',
+      contentType: false,
+      processData: false,
+      data: new FormData(this),
+      success: function(msg) {
+        console.log(msg);
+        if (msg == 'ok') {
+          $('#form').trigger('reset');
+          $('.msg').text('Сообщение успешно отправлено').addClass('success');
+          showmsg.restart();loadanim.duration(0.3).reverse();
+        } else {
+          if (msg == 'mailerror') {
+            $("#email").addClass('inputerror');
+          }
+          $('.msg').text('Ошибка. Сообщение не отправлено').addClass('error');
+          showmsg.restart();loadanim.duration(0.3).reverse();
+        }
+      }
+    });
+  });
+});
